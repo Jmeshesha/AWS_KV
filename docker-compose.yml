@@ -3,8 +3,8 @@ version: "3"
 services:
     app:
         environment:
-            - DB_USERNAME={$DB_USERNAME}
-            - DB_PASSWORD={$DB_PASSWORD}
+            - DB_USERNAME=${DB_USERNAME}
+            - DB_PASSWORD=${DB_PASSWORD}
         build:
             context: Simple-Key-Value-Store
         image: kvstore-app
