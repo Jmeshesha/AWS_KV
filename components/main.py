@@ -160,8 +160,7 @@ def query_db(query, args=(), one=False):
     rv = cur.fetchall()
     cur.close()
     return (rv[0] if rv else None) if one else rv
-# "kvdb_user"
-# "G1640217d0Z0eJeW8EApcsCKZLmNoGKa"
+
 def get_db():
     if 'db' not in g:
         g.db = psycopg2.connect(
