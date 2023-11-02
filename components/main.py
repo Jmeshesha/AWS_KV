@@ -70,6 +70,29 @@ def home():
 
         <p>For each endpoint, you can specify a key and value using url query parameters with separate parameters for the key and the value.</p>
     """
+def batch_insert():
+    print("BAtch_insert")
+    db = get_db()
+    cur = db.cursor()
+    kv = keyValueStore.retrieve()
+    # args_str = ','.join(cur.mogrify("(%s,%s)", i) for i in kv)
+    args_str = ','.join(['%s'] * len(kv))
+    query = "INSERT INTO post (post_key, post_data) VALUES {}".format(args_str)
+    cur.execute(query, list(kv.items()))
+    db.commit()
+    
+def batch_delete():
+    print("Batch Delete")
+    db = get_db()
+    cur = db.cursor()
+    keys = keyValueStore.retrieve_del_batch()
+    args_str = 'or '.join(['%s'] * len(keys))
+    for key in keys:
+        query = 'DELETE FROM post WHERE post_key=%s'
+        cur.execute(query, (key,))
+    db.commit
+    keyValueStore.clear_del_batch()
+    
 
 @app.put("/put")
 def insert():
@@ -77,20 +100,23 @@ def insert():
         return "<p>Server is still starting up please wait</p>", 500
     key = request.args.get("key")
     value = request.args.get("value")
-    db = get_db()
-    cursor = db.cursor()
+    # db = get_db()
+    # cursor = db.cursor()
     if key is None:
         return "<p>Key was not provided in query parameters</p>", 400
     if value is None:
         return "<p>Value was not provided in query parameters</p>", 400
     keyValueStore.insert(key, value)
-    cursor.execute(
-        "INSERT INTO post (post_key, post_data) VALUES (%s, %s)",
-        (key, value)
-    )
-    db.commit()
-    cursor.close()
-    db.close()
+
+    if(keyValueStore.get_cur_batch() >= 50):
+        batch_insert()
+    # cursor.execute(
+    #     "INSERT INTO post (post_key, post_data) VALUES (%s, %s)",
+    #     (key, value)
+    # )
+    # db.commit()
+    # cursor.close()
+    # db.close()
     app.logger.info(f'{key} set to {value}')
     return "<p>Successfully inserted key value pair./p>"
 
@@ -103,17 +129,17 @@ def get():
         return "<p>Key was not provided in query parameters</p>", 400
 
     value = keyValueStore.get(key)
-    if value is None:
-        db = get_db()
-        cur = db.cursor()
-        cur.execute('SELECT post_data FROM post WHERE post_key = %s' , (key,))
-        response = cur.fetchall()
-        cur.close()
-        db.close()
-        if response:
-            keyValueStore.insert(key, response[0][0])
-            return f"<p>Value for key {key} is {response[0][0]}.</p>"
-        return f"<p>No entry found for key {key}</p>", 400
+    # if value is None:
+    #     db = get_db()
+    #     cur = db.cursor()
+    #     cur.execute('SELECT post_data FROM post WHERE post_key = %s' , (key,))
+    #     response = cur.fetchall()
+    #     cur.close()
+    #     db.close()
+    #     if response:
+    #         keyValueStore.insert(key, response[0][0])
+    #         return f"<p>Value for key {key} is {response[0][0]}.</p>"
+    #     return f"<p>No entry found for key {key}</p>", 400
     
     return f"<p>Value for key {key} is {value}.</p>"
 
@@ -127,6 +153,11 @@ def delete():
         return "<p>Key was not provided in query parameters</p>", 400
 
     wasDeleted = keyValueStore.delete(key)
+    # if(not wasDeleted):
+    #     return f"<p>No entry found for key {key}.</p>", 400
+    
+    # if(len(keyValueStore.retrieve_del_batch()) >= 50):
+    #     batch_delete()
     if(not wasDeleted):
         query = 'DELETE FROM post WHERE post_key=%s'
         cur = db.cursor()
@@ -149,8 +180,8 @@ def data_dump():
     if not server_startup_finished:
         return "<p>Server is still starting up please wait</p>", 500
     temp = {}
-    for kv in query_db('select * from post'):
-        temp[kv['post_key']] = kv['post_data']
+    for kv in query_db('SELECT post_key, post_data FROM post'):
+        temp[kv[0]] = kv[1]
     return Response(json.dumps(temp), mimetype="application/json")
 
 def query_db(query, args=(), one=False):
@@ -166,8 +197,8 @@ def get_db():
         g.db = psycopg2.connect(
             host='dpg-ckonvi41tcps73ba1mkg-a.ohio-postgres.render.com',
             database='kvdb',
-            user=os.environ['DB_USERNAME'],
-            password=os.environ['DB_PASSWORD']
+            user="kvdb_user",
+            password="G1640217d0Z0eJeW8EApcsCKZLmNoGKa"
         )
     
     return g.db

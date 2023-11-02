@@ -1,4 +1,4 @@
-version: "3"
+version: "3.7"
 
 services:
     app:
@@ -6,7 +6,11 @@ services:
             - DB_USERNAME=${DB_USERNAME}
             - DB_PASSWORD=${DB_PASSWORD}
         build:
-            context: Simple-Key-Value-Store
-        image: kvstore-app
+            context: components
+    nginx:
+        container_name: nginx
+        build: nginx
         ports:
-            - "80:5000"
+            - 80:80
+        depends_on:
+            - app
