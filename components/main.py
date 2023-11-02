@@ -122,11 +122,12 @@ def insert():
 
 @app.get("/get")
 def get():
+    d = socket.gethostname()
     if not server_startup_finished:
         return "<p>Server is still starting up please wait</p>", 500
     key = request.args.get("key")
     if key is None:
-        return "<p>Key was not provided in query parameters</p>", 400
+        return f"<p>Key was not provided in query parameters</p> {d}", 400
 
     value = keyValueStore.get(key)
     # if value is None:
@@ -141,7 +142,7 @@ def get():
     #         return f"<p>Value for key {key} is {response[0][0]}.</p>"
     #     return f"<p>No entry found for key {key}</p>", 400
     
-    return f"<p>Value for key {key} is {value}.</p>"
+    return f"<p>Value for key {key} is {value}. - {d}</p>"
 
 @app.delete("/del")
 def delete():
