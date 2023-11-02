@@ -80,7 +80,7 @@ def batch_insert():
     query = "INSERT INTO post (post_key, post_data) VALUES {}".format(args_str)
     cur.execute(query, list(kv.items()))
     db.commit()
-    
+# Concat keys into one delete query
 def batch_delete():
     print("Batch Delete")
     db = get_db()
