@@ -1,0 +1,10 @@
+[2023-11-02 13:26:33,876] INFO in _internal: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[2023-11-02 13:26:33,876] INFO in _internal: [33mPress CTRL+C to quit[0m
+[2023-11-02 13:26:37,354] INFO in _internal: 127.0.0.1 - - [02/Nov/2023 13:26:37] "GET / HTTP/1.1" 200 -
+[2023-11-02 13:26:37,642] INFO in _internal: 127.0.0.1 - - [02/Nov/2023 13:26:37] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2023-11-02 13:26:42,027] INFO in _internal: 127.0.0.1 - - [02/Nov/2023 13:26:42] "GET /api/data HTTP/1.1" 200 -
+[2023-11-02 13:28:58,836] INFO in _internal: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[2023-11-02 13:28:58,836] INFO in _internal: [33mPress CTRL+C to quit[0m
+[2023-11-02 13:29:04,414] INFO in _internal: 127.0.0.1 - - [02/Nov/2023 13:29:04] "GET /api/data HTTP/1.1" 200 -

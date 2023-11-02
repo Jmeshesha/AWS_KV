@@ -85,12 +85,15 @@ def batch_delete():
     print("Batch Delete")
     db = get_db()
     cur = db.cursor()
-    keys = keyValueStore.retrieve_del_batch()
-    args_str = ','.join(['%s'] * len(keys))
-    query = "DELETE FROM post WHERE post_key IN ({})".format(args_str)
-    cur.execute(query, list(kv.keys()))
-    db.commit
-    keyValueStore.clear_del_batch()
+    keys = list(keyValueStore.retrieve_del_batch().keys())
+    if keys:
+        args_str = ','.join(['%s'] * len(keys))
+        query = "DELETE FROM post WHERE post_key IN ({})".format(args_str)
+        cur.execute(query, keys)
+        db.commit()
+        keyValueStore.clear_del_batch()
+    else:
+        pass
     
 
 @app.put("/put")
@@ -107,7 +110,7 @@ def insert():
         return "<p>Value was not provided in query parameters</p>", 400
     keyValueStore.insert(key, value)
 
-    if(keyValueStore.get_cur_batch() >= 50):
+    if(keyValueStore.get_cur_batch() >= 100):
         batch_insert()
     # cursor.execute(
     #     "INSERT INTO post (post_key, post_data) VALUES (%s, %s)",
@@ -148,30 +151,30 @@ def delete():
     if not server_startup_finished:
         return "<p>Server is still starting up please wait</p>", 500
     key = request.args.get("key")
-    db = get_db()
+    # db = get_db()
     if key is None:
         return "<p>Key was not provided in query parameters</p>", 400
 
     wasDeleted = keyValueStore.delete(key)
-    # if(not wasDeleted):
-    #     return f"<p>No entry found for key {key}.</p>", 400
-    
-    # if(len(keyValueStore.retrieve_del_batch()) >= 50):
-    #     batch_delete()
     if(not wasDeleted):
-        query = 'DELETE FROM post WHERE post_key=%s'
-        cur = db.cursor()
-        cur.execute(query, (key,))
-        cur.close()
-        db.close()
-        
         return f"<p>No entry found for key {key}.</p>", 400
-    query = 'DELETE FROM post WHERE post_key=%s'
-    cur = db.cursor()
-    cur.execute(query, (key,))
-    db.commit()
-    cur.close()
-    db.close()
+    
+    if(len(keyValueStore.retrieve_del_batch()) >= 100):
+        batch_delete()
+    # if(not wasDeleted):
+    #     query = 'DELETE FROM post WHERE post_key=%s'
+    #     cur = db.cursor()
+    #     cur.execute(query, (key,))
+    #     cur.close()
+    #     db.close()
+        
+    #     return f"<p>No entry found for key {key}.</p>", 400
+    # query = 'DELETE FROM post WHERE post_key=%s'
+    # cur = db.cursor()
+    # cur.execute(query, (key,))
+    # db.commit()
+    # cur.close()
+    # db.close()
     app.logger.info(f'{key} deleted')
     return f"<p>Successfully deleted entry for key {key}.</p>"
 
