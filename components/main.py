@@ -197,8 +197,8 @@ def get_db():
         g.db = psycopg2.connect(
             host='dpg-ckonvi41tcps73ba1mkg-a.ohio-postgres.render.com',
             database='kvdb',
-            user="kvdb_user",
-            password="G1640217d0Z0eJeW8EApcsCKZLmNoGKa"
+            user=os.environ['DB_USERNAME'],
+            password=os.environ['DB_PASSWORD']
         )
     
     return g.db
