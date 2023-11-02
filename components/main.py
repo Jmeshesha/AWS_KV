@@ -86,10 +86,9 @@ def batch_delete():
     db = get_db()
     cur = db.cursor()
     keys = keyValueStore.retrieve_del_batch()
-    args_str = 'or '.join(['%s'] * len(keys))
-    for key in keys:
-        query = 'DELETE FROM post WHERE post_key=%s'
-        cur.execute(query, (key,))
+    args_str = ','.join(['%s'] * len(keys))
+    query = "DELETE FROM post WHERE post_key IN ({})".format(args_str)
+    cur.execute(query, list(kv.keys()))
     db.commit
     keyValueStore.clear_del_batch()
     
