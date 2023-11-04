@@ -1,17 +1,19 @@
 from flask import Flask, abort, request, g, Response, current_app
 from logging.config import dictConfig
 from threadsafedictionary import ThreadSafeDictionary
-import os
-import sqlite3
+from persistance import AsyncPersistance
 import json
 import socket
-import psycopg2
+from flask_apscheduler import APScheduler
+
 keyValueStore = ThreadSafeDictionary()
 
 HOST, PORT = '0.0.0.0', 5000
 server_startup_finished = False
 
 app = Flask(__name__)
+scheduler = APScheduler()
+persistantDb = AsyncPersistance(app)
 # app.config.from_mapping(
 #     SECRET_KEY='dev',
 #     DATABASE=os.path.join(os.getcwd(), 'flaskr.sqlite'),
@@ -70,30 +72,30 @@ def home():
 
         <p>For each endpoint, you can specify a key and value using url query parameters with separate parameters for the key and the value.</p>
     """
-def batch_insert():
-    print("BAtch_insert")
-    db = get_db()
-    cur = db.cursor()
-    kv = keyValueStore.retrieve()
-    # args_str = ','.join(cur.mogrify("(%s,%s)", i) for i in kv)
-    args_str = ','.join(['%s'] * len(kv))
-    query = "INSERT INTO post (post_key, post_data) VALUES {}".format(args_str)
-    cur.execute(query, list(kv.items()))
-    db.commit()
-# Concat keys into one delete query
-def batch_delete():
-    print("Batch Delete")
-    db = get_db()
-    cur = db.cursor()
-    keys = list(keyValueStore.retrieve_del_batch().keys())
-    if keys:
-        args_str = ','.join(['%s'] * len(keys))
-        query = "DELETE FROM post WHERE post_key IN ({})".format(args_str)
-        cur.execute(query, keys)
-        db.commit()
-        keyValueStore.clear_del_batch()
-    else:
-        pass
+# def batch_insert():
+#     print("BAtch_insert")
+#     db = get_db()
+#     cur = db.cursor()
+#     kv = keyValueStore.retrieve()
+#     # args_str = ','.join(cur.mogrify("(%s,%s)", i) for i in kv)
+#     args_str = ','.join(['%s'] * len(kv))
+#     query = "INSERT INTO post (post_key, post_data) VALUES {}".format(args_str)
+#     cur.execute(query, list(kv.items()))
+#     db.commit()
+# # Concat keys into one delete query
+# def batch_delete():
+#     print("Batch Delete")
+#     db = get_db()
+#     cur = db.cursor()
+#     keys = list(keyValueStore.retrieve_del_batch().keys())
+#     if keys:
+#         args_str = ','.join(['%s'] * len(keys))
+#         query = "DELETE FROM post WHERE post_key IN ({})".format(args_str)
+#         cur.execute(query, keys)
+#         db.commit()
+#         keyValueStore.clear_del_batch()
+#     else:
+#         pass
     
 
 @app.put("/put")
@@ -109,9 +111,10 @@ def insert():
     if value is None:
         return "<p>Value was not provided in query parameters</p>", 400
     keyValueStore.insert(key, value)
+    persistantDb.saveInsert(key, value)
 
-    if(keyValueStore.get_cur_batch() >= 100):
-        batch_insert()
+    # if(keyValueStore.get_cur_batch() >= 100):
+    #     batch_insert()
     # cursor.execute(
     #     "INSERT INTO post (post_key, post_data) VALUES (%s, %s)",
     #     (key, value)
@@ -158,9 +161,9 @@ def delete():
     wasDeleted = keyValueStore.delete(key)
     if(not wasDeleted):
         return f"<p>No entry found for key {key}.</p>", 400
-    
-    if(len(keyValueStore.retrieve_del_batch()) >= 100):
-        batch_delete()
+    persistantDb.saveDelete(key)
+    # if(len(keyValueStore.retrieve_del_batch()) >= 100):
+    #     batch_delete()
     # if(not wasDeleted):
     #     query = 'DELETE FROM post WHERE post_key=%s'
     #     cur = db.cursor()
@@ -183,47 +186,55 @@ def data_dump():
     if not server_startup_finished:
         return "<p>Server is still starting up please wait</p>", 500
     temp = {}
-    for kv in query_db('SELECT post_key, post_data FROM post'):
+    for kv in persistantDb.runReadQuery('SELECT post_key, post_data FROM post'):
         temp[kv[0]] = kv[1]
     return Response(json.dumps(temp), mimetype="application/json")
 
-def query_db(query, args=(), one=False):
-    db = get_db()
-    cur = db.cursor()
-    cur.execute(query, args)
-    rv = cur.fetchall()
-    cur.close()
-    return (rv[0] if rv else None) if one else rv
+# def query_db(query, args=(), one=False):
+#     db = get_db()
+#     cur = db.cursor()
+#     cur.execute(query, args)
+#     rv = cur.fetchall()
+#     cur.close()
+#     return (rv[0] if rv else None) if one else rv
 
-def get_db():
-    if 'db' not in g:
-        g.db = psycopg2.connect(
-            host='dpg-ckonvi41tcps73ba1mkg-a.ohio-postgres.render.com',
-            database='kvdb',
-            user=os.environ['DB_USERNAME'],
-            password=os.environ['DB_PASSWORD']
-        )
+# def get_db():
+#     if 'db' not in g:
+#         g.db = psycopg2.connect(
+#             host='dpg-ckonvi41tcps73ba1mkg-a.ohio-postgres.render.com',
+#             database='kvdb',
+#             user=os.environ['DB_USERNAME'],
+#             password=os.environ['DB_PASSWORD']
+#         )
     
-    return g.db
+#     return g.db
 
 
-def close_db(e=None):
-    db = g.pop('db', None)
-    if db is not None:
-        db.close()
+# def close_db(e=None):
+#     db = g.pop('db', None)
+#     if db is not None:
+#         db.close()
 
-def init_db():
-    db = get_db()
-    print("initializing")
-    with current_app.open_resource('schema.sql') as f:
-        cursor = db.cursor()
-        cursor.execute(f.read().decode('utf8'))
-        db.commit()
+# def init_db():
+#     db = get_db()
+#     print("initializing")
+#     with current_app.open_resource('schema.sql') as f:
+#         cursor = db.cursor()
+#         cursor.execute(f.read().decode('utf8'))
+#         db.commit()
 
 with app.app_context():
- 
+    previousRecords = persistantDb.getPreviousRecords()
+    keyValueStore.insert_from_db(db_query_results=previousRecords)
+    print("Finished loading from db")
     server_startup_finished = True
-    print("Server Startup finished")
+
+@scheduler.task('interval', id='persistanceJob', seconds=2)
+def persistanceRunner():
+    persistantDb.queryRunnerJob()
 
 if __name__== "__main__":
+    scheduler.init_app(app)
+    scheduler.start()
     app.run(HOST, PORT, threaded=True, debug=False)
+    
