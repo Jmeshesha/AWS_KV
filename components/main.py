@@ -1,3 +1,23 @@
+"""
+@brief Flask Application for a key-value store.
+        Routes:
+            /put: Handles insert requests for key-value pairs (i.e localhost/put?key=test&value=1)
+            /get: Handles get requests for key-value pairs (i.e localhost/get?key=test)
+            /del: Handles delete requests for key-value pairs (i.e localhost/del?key=test)
+        Error Codes:
+            500: Server has not finished startup.
+            400: Unsuccessful key-value operation.
+            200: Successful key-value operations.
+@dependencies
+        Threadsafedictionary:
+            Handles dictionary operations for thread-safe environment.
+        APSScheduler:
+            Creates thread to schedule database queries.
+        Persistance:
+            Queues insert/delete requests for persistance storage and handles querying the database.
+@preconditions
+        Ensure that the environment variables DB_USERNAME and DB_PASSWORD are set before running.
+"""
 from flask import Flask, request, Response
 from logging.config import dictConfig
 from threadsafedictionary import ThreadSafeDictionary
@@ -17,6 +37,7 @@ app = Flask(__name__)
 scheduler = APScheduler()
 persistantDb = AsyncPersistance(app)
 
+# Configuration of Log File
 dictConfig(
     {
         "version": 1,
@@ -41,6 +62,7 @@ dictConfig(
     }
 )
 
+# Throw error page if invalid url
 @app.errorhandler(404)
 def invalid_url_handler(error):
     return """
@@ -56,6 +78,7 @@ def invalid_url_handler(error):
     </html>
     """, 404
 
+# Home page, display routes and server name
 @app.get("/")
 def home():
     d = socket.gethostname()
@@ -71,6 +94,7 @@ def home():
         <p>For each endpoint, you can specify a key and value using url query parameters with separate parameters for the key and the value.</p>
     """
 
+# Check if put request is valid, if so, insert into key-value store and record operation in persistance db.
 @app.put("/put")
 def insert():
     if not server_startup_finished:
@@ -86,6 +110,7 @@ def insert():
     app.logger.info(f'{key} set to {value}')
     return "<p>Successfully inserted key value pair./p>", 200
 
+# Retrieve key-value pair store
 @app.get("/get")
 def get():
     if not server_startup_finished:
@@ -98,6 +123,7 @@ def get():
     
     return f"<p>Value for key {key} is {value}.</p>"
 
+# Check if delete request is valid, if so delete from store and record operation in persistant runner.
 @app.delete("/del")
 def delete():
     if not server_startup_finished:
@@ -122,13 +148,14 @@ def data_dump():
         temp[kv[0]] = kv[1]
     return Response(json.dumps(temp), mimetype="application/json")
 
-
+# Load store with database
 with app.app_context():
     previousRecords = persistantDb.getPreviousRecords()
     keyValueStore.insertFromDB(db_query_results=previousRecords)
     server_startup_finished = True
     print("Finished loading from db")
 
+# Scheduler thread for running persistance storage
 @scheduler.task('interval', id='persistanceJob', seconds=1)
 def persistanceRunner():
     persistantDb.queryRunnerJob()

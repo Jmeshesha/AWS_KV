@@ -1,3 +1,6 @@
+"""
+@brief Class for thread-safe dictionary operations. Uses mutex locking.
+"""
 from threading import Lock
 class ThreadSafeDictionary:
     def __init__(self, numOfMutexes):
