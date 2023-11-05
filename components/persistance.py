@@ -13,25 +13,26 @@ class AsyncPersistance:
         self.dbPassword = os.environ["DB_PASSWORD"]
 
     def queryRunnerJob(self):
-        while True:
+        queries = []
+        notEmpty = True
+        while notEmpty:
             try:
-                query, args = self.batchQueries.get(block=False)
-                print("Query written")
-                self.runWriteQuery(query, args)
+                queries.append(self.batchQueries.get_nowait())
                 self.batchQueries.task_done()
             except Empty:
-                return
-                
+                notEmpty = False
+        self.runWriteQueries(queries)
+            
 
     def saveInsert(self, key, value):
         query = "INSERT INTO post (post_key, post_data) VALUES (%s, %s)"
-        args = (key, value, self.serverId)
-        self.batchQueries.put((query, args))
+        args = (key, value)
+        self.batchQueries.put_nowait((query, args))    
 
     def saveDelete(self, key):
         query = "DELETE FROM post WHERE post_key=%s"
         args = (key)
-        self.batchQueries.put((query, args))
+        self.batchQueries.put_nowait((query, args))
 
     def runWriteQuery(self, query, args=()):
         db = self.connectToDatabase()
@@ -39,7 +40,15 @@ class AsyncPersistance:
         cursor.execute(query, args)
         cursor.close()
         self.closeDatabase()
-    
+
+    def runWriteQueries(self, queries):
+        db = self.connectToDatabase()
+        cursor = db.cursor()
+        for query, args in queries:
+            cursor.execute(query, args)
+        cursor.close()
+        self.closeDatabase()
+
     def runReadQuery(self, query, args=()):
         db = self.connectToDatabase()
         cursor = db.cursor()
