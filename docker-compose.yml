@@ -2,15 +2,25 @@ version: "3.7"
 
 services:
     app:
+        build:
+            context: components
+            dockerfile: Dockerfile
         environment:
             - DB_USERNAME=${DB_USERNAME}
             - DB_PASSWORD=${DB_PASSWORD}
-        build:
-            context: components
+        networks:
+            - kvnetwork
     nginx:
-        container_name: nginx
-        build: nginx
+        build:
+            context: nginx
+            dockerfile: Dockerfile
+        volumes:
+            - './nginx/nginx.conf:/etc/nginx/nginx.conf'
         ports:
-            - 80:80
+            - "80:80"
+        networks:
+            - kvnetwork
         depends_on:
             - app
+networks:
+    kvnetwork:

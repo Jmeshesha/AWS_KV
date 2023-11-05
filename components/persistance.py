@@ -25,7 +25,7 @@ class AsyncPersistance:
 
     def saveInsert(self, key, value):
         query = "INSERT INTO post (post_key, post_data) VALUES (%s, %s)"
-        args = (key, value, self.serverId)
+        args = (key, value)
         self.batchQueries.put((query, args))
 
     def saveDelete(self, key):

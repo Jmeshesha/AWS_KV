@@ -62,7 +62,7 @@ def invalid_url_handler(error):
 def home():
     d = socket.gethostname()
     return f"""
-        <h1>Simple key value store - {d}</h1>
+        <h1>Simple key value store : {d}</h1>
         <p>Welcome to the simple key value store. You can use the endpoints:</p>
         <ul>
             <li>/put with a PUT request to insert the given key-value pair</li>
@@ -135,6 +135,8 @@ def get():
         return f"<p>Key was not provided in query parameters</p> {d}", 400
 
     value = keyValueStore.get(key)
+    if value is None:
+        return f"<p>No entry found for key {key} - {d}</p>", 400
     # if value is None:
     #     db = get_db()
     #     cur = db.cursor()
