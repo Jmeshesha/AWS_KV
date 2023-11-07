@@ -31,7 +31,7 @@ class AsyncPersistance:
 
     def saveDelete(self, key):
         query = "DELETE FROM post WHERE post_key=%s"
-        args = (key)
+        args = (key,)
         self.batchQueries.put_nowait((query, args))
 
     def runWriteQuery(self, query, args=()):

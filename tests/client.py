@@ -22,7 +22,8 @@ def client_thread(client_id):
     start_time = time.time()
     
     for i in range(NUM_REQUESTS):
-        loop_time = time.time()
+        if(i % 100 == 0):
+            loop_time = time.time()
         key = f"key-{client_id}-{i}"
         value = f"value-{client_id}-{i}"
         
@@ -43,11 +44,11 @@ def client_thread(client_id):
         connection.request("DELETE", f"/del?key={key}")
         response = connection.getresponse()
         response.read()
-
-        time_elapsed = time.time() - loop_time
-        time_.append(time.time() - start_time)
-        throughput_.append(div / time_elapsed)
-        latency_.append(time_elapsed / div)
+        if(i % 100 == 0):
+            time_elapsed = time.time() - loop_time
+            time_.append(time.time() - start_time)
+            throughput_.append(div / time_elapsed)
+            latency_.append(time_elapsed / div)
     # End time
     end_time = time.time()
     
@@ -89,6 +90,6 @@ if __name__ == "__main__":
     ax2.set_ylabel('Latency (s)', color=color)
     ax2.plot(time_, latency_, color=color)
     ax2.tick_params(axis='y', labelcolor=color)
-    plt.title('Throughput and Latency over Time (1 Node)')
+    plt.title('Throughput and Latency over Time (3 Node)')
     # Show the plot
     plt.show()

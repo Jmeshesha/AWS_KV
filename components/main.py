@@ -157,7 +157,7 @@ with app.app_context():
     print("Finished loading from db")
 
 # Scheduler thread for running persistance storage
-@scheduler.task('interval', id='persistanceJob', seconds=1)
+@scheduler.task('interval', id='persistanceJob', seconds=10)
 def persistanceRunner():
     persistantDb.queryRunnerJob()
 
