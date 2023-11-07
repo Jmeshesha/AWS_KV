@@ -113,6 +113,7 @@ def insert():
 # Retrieve key-value pair store
 @app.get("/get")
 def get():
+    d = socket.gethostname()
     if not server_startup_finished:
         return "<p>Server is still starting up please wait</p>", 500
     key = request.args.get("key")
@@ -121,7 +122,7 @@ def get():
 
     value = keyValueStore.get(key)
     
-    return f"<p>Value for key {key} is {value}.</p>"
+    return f"<p>Value for key {key} is {value}. - {d}</p>"
 
 # Check if delete request is valid, if so delete from store and record operation in persistant runner.
 @app.delete("/del")
