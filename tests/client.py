@@ -5,64 +5,64 @@ import http.client
 import requests
 import matplotlib.pyplot as plt
 import numpy as np
+
 HOST, PORT = '127.0.0.1', 80
 NUM_REQUESTS = 1000  # Number of requests to send per client
 NUM_CLIENTS = 10     # Number of concurrent clients
 
-# Arrays to store throughput and latency
-throughput_ = []
-latency_ = []
-elastiput_ = []
-time_ = []
+latencies = []  # To store latencies for each request
+throughputs = []
+
 def client_thread(client_id):
     connection = http.client.HTTPConnection(HOST, PORT)
-    print("Connection made")
-    div = NUM_REQUESTS * 3
-    # Start time
-    start_time = time.time()
-    
+
+    start_time_all = time.time()  # Record start time for each client
+
     for i in range(NUM_REQUESTS):
-        if(i % 100 == 0):
-            loop_time = time.time()
         key = f"key-{client_id}-{i}"
         value = f"value-{client_id}-{i}"
         
         # PUT request
-        #r = requests.put(f"http://127.0.0.1/put?key={key}&value={value}")
+        start_time = time.time()
         connection.request("PUT", f"/put?key={key}&value={value}")
         response = connection.getresponse()
         response.read()
+        end_time = time.time()
+        latency = end_time - start_time
+        latencies.append(latency)
 
         # GET request
-        #r = requests.get(f"http://127.0.0.1/get?key={key}")
+        start_time = time.time()
         connection.request("GET", f"/get?key={key}")
         response = connection.getresponse()
         response.read()
+        end_time = time.time()
+        latency = end_time - start_time
+        latencies.append(latency)
 
         # DEL request
-        #r = requests.delete(f"http://127.0.0.1/del?key={key}")
+        start_time = time.time()
         connection.request("DELETE", f"/del?key={key}")
         response = connection.getresponse()
         response.read()
-        if(i % 100 == 0):
-            time_elapsed = time.time() - loop_time
-            time_.append(time.time() - start_time)
-            throughput_.append(div / time_elapsed)
-            latency_.append(time_elapsed / div)
-    # End time
-    end_time = time.time()
-    
-    elapsed_time = end_time - start_time
-    throughput = NUM_REQUESTS * 3 / elapsed_time  # Multiply by 3 for PUT, GET, DEL
-    latency = elapsed_time / (NUM_REQUESTS * 3)  # Average latency per request
-    # throughput_x[client_id] = NUM_REQUESTS * 3 / elapsed_time  # Multiply by 3 for PUT, GET, DEL
-    # latency_x[client_id] = elapsed_time / (NUM_REQUESTS * 3)  # Average latency per request
-    # elastiput_x[client_id] = throughput_x[client_id] / latency_x[client_id]
+        end_time = time.time()
+        latency = end_time - start_time
+        latencies.append(latency)
 
-    print(f"Client-{client_id} | Throughput: {throughput:.2f} req/s | Average Latency: {latency:.6f} seconds")
+    end_time_all = time.time()  # Record end time for each client
+
+    total_requests = NUM_REQUESTS
+    total_time = end_time_all - start_time_all
+
+    throughput = total_requests / total_time
+    throughputs.append(throughput)
+
+    connection.close()
 
 if __name__ == "__main__":
     clients = []
+    start_time_all = time.time()  # Record start time for all clients
+
     for i in range(NUM_CLIENTS):
         t = threading.Thread(target=client_thread, args=(i,))
         clients.append(t)
@@ -71,25 +71,24 @@ if __name__ == "__main__":
     for t in clients:
         t.join()
 
-    print("Testing completed.")
-    # time = np.arange(NUM_CLIENTS)
+    end_time_all = time.time()  # Record end time for all clients
 
-    # Create a figure and a set of subplots
-    fig, ax1 = plt.subplots()
+    total_requests = NUM_CLIENTS * NUM_REQUESTS
+    total_time = end_time_all - start_time_all
 
-    # Plot throughput
-    color = 'tab:blue'
-    ax1.set_xlabel('Time (s)')
-    ax1.set_ylabel('Throughput (req/s)', color=color)
-    ax1.plot(time_, throughput_, color=color)
-    ax1.tick_params(axis='y', labelcolor=color)
-
-    # Create a second y-axis for latency
-    ax2 = ax1.twinx()
-    color = 'tab:red'
-    ax2.set_ylabel('Latency (s)', color=color)
-    ax2.plot(time_, latency_, color=color)
-    ax2.tick_params(axis='y', labelcolor=color)
-    plt.title('Throughput and Latency over Time (3 Node)')
-    # Show the plot
+    throughput = total_requests / total_time
+    print(f"Throughput: {throughput} requests per second")
+    x = np.linspace(0, throughput, len(latencies))
+    # Print average latency
+    avg_latency = np.mean(latencies)
+    print(f"Average Latency: {avg_latency} seconds")
+    #print(max(throughputs))
+    latencies.sort()
+    # Plot latencies over throughput
+    plt.plot(x, latencies)
+    plt.title('Latencies Over Throughput With 3 Nodes')
+    plt.xlabel('Throughput (requests per second)')
+    plt.ylabel('Latency (seconds)')
     plt.show()
+
+    print("Testing completed.")

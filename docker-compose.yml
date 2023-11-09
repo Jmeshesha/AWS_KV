@@ -10,9 +10,9 @@ services:
             - DB_PASSWORD=${DB_PASSWORD}
         networks:
             - kvnetwork
-        deploy:
-            mode: replicated
-            replicas: 3
+        # deploy:
+        #     mode: replicated
+        #     replicas: 3
     nginx:
         build:
             context: nginx
