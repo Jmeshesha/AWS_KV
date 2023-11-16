@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 HOST, PORT = '127.0.0.1', 80
-NUM_REQUESTS = 1000  # Number of requests to send per client
-NUM_CLIENTS = 10     # Number of concurrent clients
+NUM_REQUESTS = 100  # Number of requests to send per client
+NUM_CLIENTS = 5     # Number of concurrent clients
 
 latencies = []  # To store latencies for each request
 throughputs = []

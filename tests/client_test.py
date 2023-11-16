@@ -14,9 +14,9 @@ def kv_store_client(operation, key, value=None):
     start_time = time.time()
     try:
         if operation == 'set':
-            response = requests.post(f'{server_url}/{key}', json={'value': value})
+            response = requests.put(f'{server_url}/put?key={key}&value={value}')
         elif operation == 'get':
-            response = requests.get(f'{server_url}/{key}')
+            response = requests.get(f'{server_url}/get?key={key}')
         else:
             raise ValueError('Invalid operation')
         end_time = time.time()
@@ -64,16 +64,16 @@ def benchmark(num_operations, num_processes):
     while not latencies_queue.empty():
         total_latencies.append(latencies_queue.get())
 
-    average_latency = sum(total_latencies) / len(total_latencies)
+    average_latency = (sum(total_latencies) / len(total_latencies)) * 1000
     print(f'Total Latency: {sum(total_latencies):.2f} second')
     print(f'Length of latencies: {len(total_latencies):.0f} latencies')
     throughput = total_operations / total_time
     print(f'Total Operation: {total_operations:.0f} operations')
-    print(f'Average Latency: {average_latency:.5f} seconds per operation')
+    print(f'Average Latency: {average_latency:.5f} milliseconds per operation')
     print(f'Throughput: {throughput:.2f} operations per second')
     print(f'Total Benchmark Time: {total_time:.2f} seconds')
 
 if __name__ == '__main__':
-    num_operations_per_process = 100
-    num_processes = 5
+    num_operations_per_process = 1000
+    num_processes = 10
     benchmark(num_operations_per_process, num_processes)
