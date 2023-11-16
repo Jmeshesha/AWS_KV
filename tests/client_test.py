@@ -17,6 +17,8 @@ def kv_store_client(operation, key, value=None):
             response = requests.put(f'{server_url}/put?key={key}&value={value}')
         elif operation == 'get':
             response = requests.get(f'{server_url}/get?key={key}')
+        elif operation == 'del':
+            response = requests.delete(f'{server_url}/del?key={key}')
         else:
             raise ValueError('Invalid operation')
         end_time = time.time()
@@ -45,6 +47,10 @@ def benchmark(num_operations, num_processes):
         multiprocessing.Process(target=worker, args=(num_operations, latencies_queue, 'get', i))
         for i in range(num_processes)
     ]
+    del_processes = [
+        multiprocessing.Process(target=worker, args=(num_operations, latencies_queue, 'del', i))
+        for i in range(num_processes)
+    ]
     start_time = time.time()
 
     for p in set_processes:
@@ -55,6 +61,11 @@ def benchmark(num_operations, num_processes):
     for p in get_processes:
         p.start()
     for p in get_processes:
+        p.join()
+
+    for p in del_processes:
+        p.start()
+    for p in del_processes:
         p.join()
 
     total_time = time.time() - start_time
@@ -74,6 +85,6 @@ def benchmark(num_operations, num_processes):
     print(f'Total Benchmark Time: {total_time:.2f} seconds')
 
 if __name__ == '__main__':
-    num_operations_per_process = 1000
-    num_processes = 10
+    num_operations_per_process = 100
+    num_processes = 5
     benchmark(num_operations_per_process, num_processes)
