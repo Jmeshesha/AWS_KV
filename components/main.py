@@ -19,8 +19,8 @@
         Ensure that the environment variables DB_USERNAME and DB_PASSWORD are set before running.
 """
 from flask import Flask, request, Response
-from logging.config import dictConfig
 from threadsafedictionary import ThreadSafeDictionary
+# from logging.config import dictConfig
 from persistance import AsyncPersistance
 import json
 import socket
@@ -30,7 +30,7 @@ from kvstore import KeyValueStore
 #keyValueStore = KeyValueStore(1)
 keyValueStore = ThreadSafeDictionary(10)
 
-HOST, PORT = '0.0.0.0', 5000
+HOST, PORT = '0.0.0.0', 80
 server_startup_finished = False
 
 app = Flask(__name__)
@@ -38,29 +38,30 @@ scheduler = APScheduler()
 persistantDb = AsyncPersistance(app)
 
 # Configuration of Log File
-dictConfig(
-    {
-        "version": 1,
-        "formatters": {
-            "default": {
-                "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
-            }
-        },
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "stream": "ext://sys.stdout",
-                "formatter": "default",
-            },
-            "file": {
-                "class": "logging.FileHandler",
-                "filename": "flask.log",
-                "formatter": "default",
-            },
-        },
-        "root": {"level": "INFO", "handlers": ["file"]},
-    }
-)
+# dictConfig(
+#     {
+#         "version": 1,
+#         "formatters": {
+#             "default": {
+#                 "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
+#             }
+#         },
+#         "handlers": {
+#             "console": {
+#                 "class": "logging.StreamHandler",
+#                 "stream": "ext://sys.stdout",
+#                 "formatter": "default",
+#             },
+#             "file": {
+#                 "class": "logging.FileHandler",
+#                 "filename": "flask.log",
+#                 "formatter": "default",
+#             },
+#         },
+#         "root": {"level": "INFO", "handlers": ["file"]},
+#     }
+# )
+
 
 # Throw error page if invalid url
 @app.errorhandler(404)
@@ -95,41 +96,82 @@ def home():
     """
 
 # Check if put request is valid, if so, insert into key-value store and record operation in persistance db.
-@app.put("/put")
+@app.route("/post", methods=['POST'])
 def insert():
     if not server_startup_finished:
         return "<p>Server is still starting up plase wait</p>", 500
-    key = request.args.get("key")
-    value = request.args.get("value")
+    data = request.get_json()
+    key = data.get("key")
+    value = data.get("value")
     if key is None:
         return "<p>Key was not provided in query parameters</p>", 400
     if value is None:
         return "<p>Value was not provided in query parameters</p>", 400
     keyValueStore.insert(key, value)
     persistantDb.saveInsert(key, value)
-    app.logger.info(f'{key} set to {value}')
+    #app.logger.info(f'{key} set to {value}')
     return "<p>Successfully inserted key value pair./p>", 200
+# @app.put("/put")
+# def insert():
+#     if not server_startup_finished:
+#         return "<p>Server is still starting up plase wait</p>", 500
+#     key = request.args.get("key")
+#     value = request.args.get("value")
+#     if key is None:
+#         return "<p>Key was not provided in query parameters</p>", 400
+#     if value is None:
+#         return "<p>Value was not provided in query parameters</p>", 400
+#     keyValueStore.insert(key, value)
+#     persistantDb.saveInsert(key, value)
+#     return "<p>Successfully inserted key value pair./p>", 200
 
 # Retrieve key-value pair store
-@app.get("/get")
+# @app.get("/get")
+# def get():
+#     d = socket.gethostname()
+#     if not server_startup_finished:
+#         return "<p>Server is still starting up please wait</p>", 500
+#     key = request.args.get("key")
+#     if key is None:
+#         return "<p>Key was not provided in query parameters</p>", 400
+
+#     value = keyValueStore.get(key)
+    
+#     return f"<p>Value for key {key} is {value}. - {d}</p>"
+
+@app.route("/get", methods=['GET'])
 def get():
     d = socket.gethostname()
     if not server_startup_finished:
         return "<p>Server is still starting up please wait</p>", 500
-    key = request.args.get("key")
+    key = request.headers.get("key")
     if key is None:
-        return "<p>Key was not provided in query parameters</p>", 400
+        return "<p>Key was not provided in headers</p>", 400
 
     value = keyValueStore.get(key)
     
     return f"<p>Value for key {key} is {value}. - {d}</p>"
 
 # Check if delete request is valid, if so delete from store and record operation in persistant runner.
-@app.delete("/del")
+# @app.delete("/del")
+# def delete():
+#     if not server_startup_finished:
+#         return "<p>Server is still starting up please wait</p>", 500
+#     key = request.args.get("key")
+#     if key is None:
+#         return "<p>Key was not provided in query parameters</p>", 400
+
+#     wasDeleted = keyValueStore.delete(key)
+#     if(not wasDeleted):
+#         return f"<p>No entry found for key {key}.</p>", 400
+#     persistantDb.saveDelete(key)
+#     #app.logger.info(f'{key} deleted')
+#     return f"<p>Successfully deleted entry for key {key}.</p>"
+@app.route("/del", methods=['DELETE'])
 def delete():
     if not server_startup_finished:
         return "<p>Server is still starting up please wait</p>", 500
-    key = request.args.get("key")
+    key = request.headers.get("key")
     if key is None:
         return "<p>Key was not provided in query parameters</p>", 400
 
@@ -137,7 +179,7 @@ def delete():
     if(not wasDeleted):
         return f"<p>No entry found for key {key}.</p>", 400
     persistantDb.saveDelete(key)
-    app.logger.info(f'{key} deleted')
+    #app.logger.info(f'{key} deleted')
     return f"<p>Successfully deleted entry for key {key}.</p>"
 
 @app.route('/api/data', methods=['GET'])

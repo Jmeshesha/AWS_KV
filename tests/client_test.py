@@ -14,11 +14,11 @@ def kv_store_client(operation, key, value=None):
     start_time = time.time()
     try:
         if operation == 'set':
-            response = requests.put(f'{server_url}/put?key={key}&value={value}')
+            response = requests.post(f'{server_url}/post', json={'key': key, 'value': value})
         elif operation == 'get':
-            response = requests.get(f'{server_url}/get?key={key}')
+            response = requests.get(f'{server_url}/get', json={'key': key})
         elif operation == 'del':
-            response = requests.delete(f'{server_url}/del?key={key}')
+            response = requests.delete(f'{server_url}/del', json={'key': key})
         else:
             raise ValueError('Invalid operation')
         end_time = time.time()

@@ -8,6 +8,6 @@ ENV TZ=America/New_York
 
 RUN pip install -r Requirements.txt
 
-EXPOSE 5000
+EXPOSE 80
 
-CMD ["python", "main.py"]
+CMD ["gunicorn", "-b", "0.0.0.0:80", "main:app"]
