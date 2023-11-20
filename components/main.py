@@ -25,7 +25,6 @@ from persistance import AsyncPersistance
 import json
 import socket
 from flask_apscheduler import APScheduler
-from kvstore import KeyValueStore
 
 #keyValueStore = KeyValueStore(1)
 keyValueStore = ThreadSafeDictionary(10)
