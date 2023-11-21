@@ -62,3 +62,7 @@ gcloud compute instance-groups managed rolling-action start-update INSTANCE_GROU
 ## Permissions
 * Service Usage Admin
 * Compute Admin
+
+## Useful links
+* [Stackoverflow](https://stackoverflow.com/questions/45109657/api-equivalent-of-gcloud-compute-instance-groups-managed-list)
+* [instanceGroupManagers().get()](https://developers.google.com/resources/api-libraries/documentation/compute/v1/python/latest/compute_v1.instanceGroups.html#get)
