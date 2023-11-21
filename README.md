@@ -44,7 +44,7 @@ This will drain the instances and replace them with the new version.<br>
 ```
 gcloud compute instance-groups managed rolling-action start-update INSTANCE_GROUP_NAME \
     --version=template=NEW_INSTANCE_TEMPLATE_NAME \
-    --zone=us-central1-c
+    --region=us-central1
 
 ```
 
@@ -55,6 +55,10 @@ Also, set the max-unavailable to 100% since we are assuming all nodes are alread
 gcloud compute instance-groups managed rolling-action start-update INSTANCE_GROUP_NAME \
     --version=template=OLD_INSTANCE_TEMPLATE_NAME \
     --max-unavailable=100% \
-    --zone=us-central1-c
+    --region=us-central1
 
 ```
+
+## Permissions
+* Service Usage Admin
+* Compute Admin
