@@ -31,7 +31,8 @@ jobs:
         run: echo "deploy_version=$(gcloud compute instance-groups managed list --project=kvproject-405420 --zones=us-central1-c --format=json | python parse-deployment-version.py)" >> "$GITHUB_OUTPUT"
 
       - name: 'Validate deployment version'
-        if: ${{ steps.deployment_version.outputs.deploy_version != 'undefined'}}
+        if: ${{ steps.deployment_version.outputs.deploy_version == 'undefined'}}
+        run: exit 1
 
       - name: 'Get rollback deployment version'
         run: echo ${{ steps.deployment_version.outputs.deploy_version + 1}}
