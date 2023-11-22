@@ -1,5 +1,5 @@
 name: rollback-deployment
-run-name: ${{ github.actor }} is learning GitHub Actions
+run-name: ${{ github.actor }} is rolling back the deployment in GCP
 on:
   workflow_dispatch:
 jobs:
@@ -14,9 +14,10 @@ jobs:
       - name: 'Authenticate GCP'
         id: 'auth'
         uses: 'google-github-actions/auth@v1'
+        env:
+          gcp_credentials: ${{ secrets.GCP_SERVICE_ACCOUNT_CREDENTIALS }}
         with:
-          workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
-          service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
+          credentials_json: "$gcp_credentials"
 
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v1'
@@ -28,4 +29,4 @@ jobs:
         working-directory: ./AWS_KV/deployment_scripts
         run: echo "deploment_version= $(gcloud compute instance-groups managed list \ 
           --project=kvproject-405420 --zones=us-central1-c --format=json | \ 
-          python3 parse-deployment-version.py)" >> "$GITHUB_OUTPUT"
+          python3 parse-deployment-version.py)"
