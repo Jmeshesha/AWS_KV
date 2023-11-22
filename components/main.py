@@ -71,7 +71,7 @@ def invalid_url_handler(error):
         <h1>404 Not Found</h1>
         <p>Invalid url. Use the endpoints: </p>
         <ul>
-            <li>/put to insert a value into the key-value store</li>
+            <li>/post to insert a value into the key-value store</li>
             <li>/get to get a value from key-value store</li>
             <li>/del to delete a value from the key-value store/li>
         </ul>
@@ -86,7 +86,7 @@ def home():
         <h1>Simple key value store : {d}</h1>
         <p>Welcome to the simple key value store. You can use the endpoints:</p>
         <ul>
-            <li>/put with a PUT request to insert the given key-value pair</li>
+            <li>/post with a POST request to insert the given key-value pair</li>
             <li>/get with a GET request to get the value associated with the given key</li>
             <li>/del with a DELETE request to delete the value associated with the given key</li>
         </ul>
