@@ -1,7 +1,7 @@
 name: rollback-deployment
 run-name: ${{ github.actor }} is learning GitHub Actions
 on:
-  workflow_call:
+  workflow_dispatch:
     secrets:
       access-token:
         description: 'A token passed from the caller workflow'
