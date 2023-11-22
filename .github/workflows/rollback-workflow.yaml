@@ -28,4 +28,5 @@ jobs:
       - name: 'Get deployment version'
         id: deployment_version
         working-directory: deployment_scripts
-        run: gcloud compute instance-groups managed list --project=kvproject-405420 --zones=us-central1-c --format=json | python parse-deployment-version.py
+        run: echo "deploy_version=$(gcloud compute instance-groups managed list --project=kvproject-405420 --zones=us-central1-c --format=json | python parse-deployment-version.py)" >> "$GITHUB_OUTPUT"
+        
