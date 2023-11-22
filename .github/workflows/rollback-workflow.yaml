@@ -2,10 +2,6 @@ name: rollback-deployment
 run-name: ${{ github.actor }} is learning GitHub Actions
 on:
   workflow_dispatch:
-    secrets:
-      access-token:
-        description: 'A token passed from the caller workflow'
-        required: false
 jobs:
   rollback:
     runs-on: ubuntu-latest
