@@ -35,4 +35,4 @@ jobs:
         run: exit 1
 
       - name: 'Get rollback deployment version'
-        run: echo ${{ steps.deployment_version.outputs.deploy_version + 1}}
+        run: echo ((${{ steps.deployment_version.outputs.deploy_version}} + 1)) 
