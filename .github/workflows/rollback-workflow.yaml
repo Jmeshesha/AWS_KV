@@ -24,7 +24,7 @@ jobs:
     
       - name: 'Get deployment version'
         id: deployment_version
-        working-directory: ./AWS_KV/deployment_scripts
+        working-directory: deployment_scripts
         run: echo "deploment_version= $(gcloud compute instance-groups managed list \ 
           --project=kvproject-405420 --zones=us-central1-c --format=json | \ 
           python3 parse-deployment-version.py)"
