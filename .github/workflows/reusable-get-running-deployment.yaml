@@ -37,7 +37,4 @@ jobs:
       - name: 'Validate current deployment version'
         if: ${{ steps.deployment_version.outputs.deploy_version == 'undefined'}}
         run: exit 1
-
-      - name: 'Output deployment version
-            
           
