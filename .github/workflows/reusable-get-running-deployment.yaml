@@ -1,7 +1,11 @@
-name: rollback-deployment
-run-name: ${{ github.actor }} is rolling back the deployment in GCP
+name: GetRunningDeployment_Reusable 
 on:
-  workflow_dispatch:
+  workflow_call:
+      # Map the workflow outputs to job outputs
+      outputs:
+        currentDeploymentVersion:
+          description: "The current deployment version"
+          value: ${{ jobs.example_job.outputs.output1 }
 jobs:
   rollback:
     runs-on: ubuntu-latest
@@ -25,14 +29,15 @@ jobs:
         with:
           version: '>= 363.0.0'
     
-      - name: 'Get deployment version'
-        id: deployment_version
+      - name: 'Get current deployment version'
+        id: current_deployment
         working-directory: deployment_scripts
         run: echo "deploy_version=$(gcloud compute instance-groups managed list --project=kvproject-405420 --zones=us-central1-c --format=json | python parse-deployment-version.py)" >> "$GITHUB_OUTPUT"
 
-      - name: 'Validate deployment version'
+      - name: 'Validate current deployment version'
         if: ${{ steps.deployment_version.outputs.deploy_version == 'undefined'}}
         run: exit 1
 
-      - name: 'Get rollback deployment version'
-        run: echo $((${{ steps.deployment_version.outputs.deploy_version}} + 1)) 
+      - name: 'Output deployment version
+            
+          
