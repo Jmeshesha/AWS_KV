@@ -33,4 +33,7 @@ jobs:
       - name: 'Validate current deployment version'
         if: ${{ steps.deployment_version.outputs.deploy_version == 'undefined'}}
         run: exit 1
+
+      - name: 'Update gcp Image'
+        uses: ./.github/workflows/update-gcp-image.yaml
           
