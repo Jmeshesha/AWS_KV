@@ -40,17 +40,8 @@ jobs:
           version: '>= 363.0.0'
     
       - name: 'Create new instance template in GCP'
-        run: gcloud compute instance-templates create-with-container key-val-template-${{inputs.deployment_version}} \
-          --region=us-central1 \
-          --machine-type=e2-micro \
-          --container-image=owens518/gc_kv_store:v${{inputs.deployment_version}} \
-          --container-env=DB_USERNAME=${{ secrets.db_username }},DB_PASSWORD=${{ secrets.db_username }} \
-          --tags=http-server,lb-health-check \
-          --labels=env=prod,app=myapp \
-          --scopes=https://www.googleapis.com/auth/cloud-platform
+        run: gcloud compute instance-templates create-with-container key-val-template-${{inputs.deployment_version}} --region=us-central1 --machine-type=e2-micro --container-image=owens518/gc_kv_store:v${{inputs.deployment_version}} --container-env=DB_USERNAME=${{ secrets.db_username }},DB_PASSWORD=${{ secrets.db_username }} --tags=http-server,lb-health-check --labels=env=prod,app=myapp --scopes=https://www.googleapis.com/auth/cloud-platform
 
       - name: 'Update instance group to template'
-        run: gcloud compute instance-groups managed rolling-action start-update key-val-group-inst \
-          --version=template=key-val-template-${{inputs.deployment_version}} \
-          --zone=us-central1-c
+        run: gcloud compute instance-groups managed rolling-action start-update key-val-group-inst --version=template=key-val-template-${{inputs.deployment_version}} --zone=us-central1-c
           
