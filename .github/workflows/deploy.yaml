@@ -1,6 +1,13 @@
 name: deploy 
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - 'main'
+    paths-ignore:
+      - '.github/workflows/**'
+      - 'deployment_scripts/**'
+      - 'README.md'
 
 jobs:
   get-deploy-version:
