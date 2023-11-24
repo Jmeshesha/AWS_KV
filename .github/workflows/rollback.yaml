@@ -35,7 +35,7 @@ jobs:
         run: exit 1
 
       - name: 'Update gcp Image'
-        uses: ./.github/workflows/update-gcp-image.yaml
+        uses: ./.github/workflows/actions/update-gcp-image/
         with:
           deployment_version: $(${{steps.deployment_version.outputs.deploy_version}} - 1)
           
