@@ -10,14 +10,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
     
-      - name: 'Get latest deployment version'
+      - name: 'Get latest tag from dockerhub'
         id: current_deployment
-        uses: shrink/actions-docker-latest-image@v1
+        uses: jacobtomlinson/gha-get-docker-hub-tags@0.1.1
         with:
-          repository: 'owens518/gc_kv_store'
+          org: 'owens518'  
+          repo: 'gc_kv_store'  
 
       - name: 'Validate current deployment version'
-        run: echo ${{steps.current_deployment.ouputs.tag}}
+        run: echo ${{steps.current_deployment.outputs.tag}}
 
       
 
