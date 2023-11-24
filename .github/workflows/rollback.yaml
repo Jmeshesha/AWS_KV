@@ -35,7 +35,7 @@ jobs:
 
   rollback-image:
     needs: get-rollback-version
-    uses: ./.github/workflows/actions/update-gcp-image.yaml
+    uses: ./.github/workflows/update-gcp-image.yaml
     with:
       deployment_version: ${{needs.get-rollback-version.outputs.rollback-version}}
           
