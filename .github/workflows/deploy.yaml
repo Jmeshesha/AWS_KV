@@ -6,21 +6,17 @@ jobs:
   get-deploy-version:
     runs-on: ubuntu-latest
     outputs: 
-      deploy-version: ${{steps.new_deployment_version.outputs.new_version}}
+      deploy-version: ${{steps.new_deployment.outputs.new_version}}
     steps:
-      - name: 'Get latest tag from dockerhub'
-        id: current_deployment_tag
-        run: echo "tag=$(curl -L --fail "https://hub.docker.com/v2/repositories/owens518/gc_kv_store/tags/?page_size=100" | jq '.results | .[] | .name' -r | sed 's/latest//' | sort --version-sort | tail -n 1 | cut -c2-)" >> "$GITHUB_OUTPUT"
-
-      - name: 'Extract current deployment version'
-        id: current_deployment_version
-        run: echo "version=${{steps.current_deployment_tag.outputs.tag}}" >> "$GITHUB_OUTPUT"
+      - name: 'Get latest deployment version from dockerhub tags'
+        id: current_deployment
+        run: echo "version=$(curl -L --fail "https://hub.docker.com/v2/repositories/owens518/gc_kv_store/tags/?page_size=100" | jq '.results | .[] | .name' -r | sed 's/latest//' | sort --version-sort | tail -n 1 | cut -c2-)" >> "$GITHUB_OUTPUT"
       
       - name: 'Calculate new deployment version'
-        id: new_deployment_version
+        id: new_deployment
         run: |
-          echo "new_version=$((${{steps.current_deployment_version.outputs.version}} + 1))"
-          echo "new_version=$((${{steps.current_deployment_version.outputs.version}} + 1))" >> "$GITHUB_OUTPUT"
+          echo "new_version=$((${{steps.current_deployment.outputs.version}} + 1))"
+          echo "new_version=$((${{steps.current_deployment.outputs.version}} + 1))" >> "$GITHUB_OUTPUT"
 
   # deploy-to-dockerhub:
   #   needs: get-deploy-version
