@@ -35,7 +35,7 @@ jobs:
         with:
           push: true
           context: components/
-          tags: owens518/gc_kv_store:${{needs.get-deploy-version.outputs.deploy-version}}
+          tags: owens518/gc_kv_store:v${{needs.get-deploy-version.outputs.deploy-version}}
 
       
 
