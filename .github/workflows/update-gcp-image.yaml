@@ -42,8 +42,6 @@ jobs:
       - name: 'Get all instance templates in GCP'
         id: template_list
         run: echo "templates=$(gcloud compute instance-templates list --format='value[terminator=`](name:sort=1)')" >> "$GITHUB_OUTPUT"
-
-      - run: echo ${{!contains(steps.template_list.outputs.templates, format('key-val-template-{0}', inputs.deployment_version))}}
     
       - name: 'Create new instance template in GCP'
         if: ${{!contains(steps.template_list.outputs.templates, format('key-val-template-{0}', inputs.deployment_version))}}
