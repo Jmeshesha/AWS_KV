@@ -40,10 +40,10 @@ jobs:
       
 
   deploy-to-gcp:
-    needs: get-deploy-version
+    needs: deploy-to-dockerhub
     uses: ./.github/workflows/update-gcp-image.yaml
     with:
-      deployment_version: ${{needs.get-rollback-version.outputs.rollback-version}}
+      deployment_version: ${{needs.deploy-to-dockerhub.outputs.deploy-version}}
     secrets: 
       gcp_credentials: ${{ secrets.GCP_SERVICE_ACCOUNT_CREDENTIALS }}
       db_username: ${{ secrets.DB_USERNAME }}
