@@ -1,0 +1,33 @@
+name: deploy 
+on:
+  workflow_dispatch:
+
+jobs:
+  get-deploy-version:
+    runs-on: ubuntu-latest
+    outputs: 
+      rollback-version: ${{steps.rollback_deployment.outputs.rollback_version}}
+    steps:
+      - uses: actions/checkout@v4
+    
+      - name: 'Get latest deployment version'
+        id: current_deployment
+        uses: shrink/actions-docker-latest-image@v1
+        with:
+          repository: 'owens518/gc_kv_store'
+
+      - name: 'Validate current deployment version'
+        run: echo ${{steps.current_deployment.ouputs.tag}}
+
+      
+
+  # rollback-image:
+  #   needs: get-deploy-version
+  #   uses: ./.github/workflows/update-gcp-image.yaml
+  #   with:
+  #     deployment_version: ${{needs.get-rollback-version.outputs.rollback-version}}
+  #   secrets: 
+  #     gcp_credentials: ${{ secrets.GCP_SERVICE_ACCOUNT_CREDENTIALS }}
+  #     db_username: ${{ secrets.DB_USERNAME }}
+  #     db_password: ${{ secrets.DB_PASSWORD }}
+          
