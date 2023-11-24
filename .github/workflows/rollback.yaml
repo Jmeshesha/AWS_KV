@@ -6,7 +6,7 @@ jobs:
   get-rollback-version:
     runs-on: ubuntu-latest
     outputs: 
-      rollback-version: $(${{steps.current_deployment.outputs.deploy_version}} - 1)
+      rollback-version: ${{steps.rollback_deployment.outputs.rollback_version}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
@@ -32,6 +32,10 @@ jobs:
       - name: 'Validate current deployment version'
         if: ${{ steps.current_deployment.outputs.deploy_version == 'undefined'}}
         run: exit 1
+
+      - name: 'Calculate Rollback Version'
+        id: rollback_deployment
+        run: echo "rollback_version=$(${{steps.current_deployment.outputs.deploy_version}} - 1)" >> "$GITHUB_OUTPUT"
 
   rollback-image:
     needs: get-rollback-version
