@@ -14,7 +14,7 @@ jobs:
 
       - name: 'Extract current deployment version'
         id: current_deployment_version
-        run: echo "version=$(cut -c2- ${{steps.current_deployment_tag.outputs.tag}})" >> "$GITHUB_OUTPUT"
+        run: echo "version=$(echo ${{steps.current_deployment_tag.outputs.tag}} | cut -c2- )" >> "$GITHUB_OUTPUT"
       
       - name: 'Calculate new deployment version'
         id: new_deployment_version
