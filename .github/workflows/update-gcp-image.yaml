@@ -38,8 +38,13 @@ jobs:
         uses: 'google-github-actions/setup-gcloud@v1'
         with:
           version: '>= 363.0.0'
+
+      - name: 'Get all instance templates in GCP'
+        id: template_list
+        run: echo "templates=$(gcloud compute instance-templates list --format='value(name:sort=1)'" >> "$GITHUB_OUTPUT"
     
       - name: 'Create new instance template in GCP'
+        if: ${{!contains(steps.template_list.outputs.templates, format('key-val-template-{0}',inputs.deployment_version)}}}}
         run: gcloud compute instance-templates create-with-container key-val-template-${{inputs.deployment_version}} --region=us-central1 --machine-type=e2-micro --container-image=owens518/gc_kv_store:v${{inputs.deployment_version}} --container-env=DB_USERNAME=${{ secrets.db_username }},DB_PASSWORD=${{ secrets.db_username }} --tags=http-server,lb-health-check --labels=env=prod,app=myapp --scopes=https://www.googleapis.com/auth/cloud-platform
 
       - name: 'Update instance group to template'
