@@ -44,4 +44,6 @@ jobs:
     uses: ./.github/workflows/update-gcp-image.yaml
     with:
       deployment_version: ${{needs.get-rollback-version.outputs.rollback-version}}
+    secrets: 
+      gcp_credentials: ${{ secrets.GCP_SERVICE_ACCOUNT_CREDENTIALS }}
           
