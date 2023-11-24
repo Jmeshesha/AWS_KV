@@ -35,7 +35,7 @@ jobs:
 
       - name: 'Calculate Rollback Version'
         id: rollback_deployment
-        run: echo "rollback_version=$((${{steps.current_deployment.outputs.deploy_version}} - 1))" >> "$GITHUB_OUTPUT"
+        run: echo "rollback_version=$((${{steps.current_deployment.outputs.deploy_version}} - 1))"
 
   rollback-image:
     needs: get-rollback-version
