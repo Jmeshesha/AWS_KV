@@ -6,7 +6,7 @@ jobs:
   get-rollback-version:
     runs-on: ubuntu-latest
     outputs: 
-      rollback-version: ${{steps.rollback_deployment.outputs.rollback_version}
+      rollback-version: ${{steps.rollback_deployment.outputs.rollback_version}}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
