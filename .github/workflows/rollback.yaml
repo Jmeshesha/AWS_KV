@@ -31,8 +31,6 @@ jobs:
         run: echo "deploy_version=$(gcloud compute instance-groups managed list --project=kvproject-405420 --zones=us-central1-c --format=json | python parse-deployment-version.py)" >> "$GITHUB_OUTPUT"
 
       - name: 'Validate current deployment version'
-        env: 
-          deploy_version: ${{ steps.deployment_version.outputs.deploy_version }}
-        if: ${{ $deploy_version == 'undefined'}}
+        if: ${{ steps.deployment_version.outputs.deploy_version == 'undefined'}}
         run: exit 1
           
