@@ -16,36 +16,36 @@ jobs:
         id: new_deployment
         run: echo "new_version=$((${{steps.current_deployment.outputs.version}} + 1))" >> "$GITHUB_OUTPUT"
 
-  # deploy-to-dockerhub:
-  #   needs: get-deploy-version
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     deploy-version: ${{needs.get-deploy-version.outputs.deploy-version}} 
-  #   steps:
-  #     - uses: actions/checkout@v4
+  deploy-to-dockerhub:
+    needs: get-deploy-version
+    runs-on: ubuntu-latest
+    outputs:
+      deploy-version: ${{needs.get-deploy-version.outputs.deploy-version}} 
+    steps:
+      - uses: actions/checkout@v4
       
-  #     - name: Login to Docker Hub
-  #       uses: docker/login-action@v3
-  #       with:
-  #         username: ${{ secrets.DOCKERHUB_USERNAME }}
-  #         password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
   
-  #     - name: Build and push
-  #       uses: docker/build-push-action@v5
-  #       with:
-  #         push: true
-  #         context: components/
-  #         tags: owens518/gc_kv_store:${{needs.get-deploy-version.outputs.deploy-version}}
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          context: components/
+          tags: owens518/gc_kv_store:${{needs.get-deploy-version.outputs.deploy-version}}
 
       
 
-  # deploy-to-gcp:
-  #   needs: get-deploy-version
-  #   uses: ./.github/workflows/update-gcp-image.yaml
-  #   with:
-  #     deployment_version: ${{needs.get-rollback-version.outputs.rollback-version}}
-  #   secrets: 
-  #     gcp_credentials: ${{ secrets.GCP_SERVICE_ACCOUNT_CREDENTIALS }}
-  #     db_username: ${{ secrets.DB_USERNAME }}
-  #     db_password: ${{ secrets.DB_PASSWORD }}
+  deploy-to-gcp:
+    needs: get-deploy-version
+    uses: ./.github/workflows/update-gcp-image.yaml
+    with:
+      deployment_version: ${{needs.get-rollback-version.outputs.rollback-version}}
+    secrets: 
+      gcp_credentials: ${{ secrets.GCP_SERVICE_ACCOUNT_CREDENTIALS }}
+      db_username: ${{ secrets.DB_USERNAME }}
+      db_password: ${{ secrets.DB_PASSWORD }}
           
