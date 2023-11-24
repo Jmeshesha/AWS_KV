@@ -13,11 +13,11 @@ jobs:
         id: dockerCall
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'https://hub.docker.com/v2/namespaces/owens518/repositories/gc_kv_store/tags/v${inputs.image_version}'
+          url: 'https://hub.docker.com/v2/namespaces/owens518/repositories/gc_kv_store/tags/v${{inputs.image_version}}'
           method: 'GET'
 
       - name: 'Validate dockerhub response'
-        run: echo ${steps.dockerCall.headers}
+        run: echo ${{steps.dockerCall.headers}}
         
     
     
