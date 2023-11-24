@@ -10,11 +10,11 @@ jobs:
     steps:
       - name: 'Get latest tag from dockerhub'
         id: current_deployment_tag
-        run: echo "tag=$(curl -L --fail "https://hub.docker.com/v2/repositories/owens518/gc_kv_store/tags/?page_size=100" | jq '.results | .[] | .name' -r | sed 's/latest//' | sort --version-sort | tail -n 1)" >> "$GITHUB_OUTPUT"
+        run: echo "tag=$(curl -L --fail "https://hub.docker.com/v2/repositories/owens518/gc_kv_store/tags/?page_size=100" | jq '.results | .[] | .name' -r | sed 's/latest//' | sort --version-sort | tail -n 1 | cut -c2-)" >> "$GITHUB_OUTPUT"
 
       - name: 'Extract current deployment version'
         id: current_deployment_version
-        run: echo "version=$(echo ${{steps.current_deployment_tag.outputs.tag}} | cut -c2- )" >> "$GITHUB_OUTPUT"
+        run: echo "version=${{steps.current_deployment_tag.outputs.tag}}" >> "$GITHUB_OUTPUT"
       
       - name: 'Calculate new deployment version'
         id: new_deployment_version
