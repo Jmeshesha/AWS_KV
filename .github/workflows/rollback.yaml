@@ -3,16 +3,15 @@ on:
   workflow_dispatch:
 
 jobs:
-  rollback:
+  get-rollback-version:
     runs-on: ubuntu-latest
+    outputs: 
+      rollback-version: $(${{steps.current_deployment.outputs.deploy_version}} - 1)
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-
-      - name: "Check python installed"
-        run: python --version
   
       - name: 'Authenticate GCP'
         id: 'auth'
@@ -31,11 +30,12 @@ jobs:
         run: echo "deploy_version=$(gcloud compute instance-groups managed list --project=kvproject-405420 --zones=us-central1-c --format=json | python parse-deployment-version.py)" >> "$GITHUB_OUTPUT"
 
       - name: 'Validate current deployment version'
-        if: ${{ steps.deployment_version.outputs.deploy_version == 'undefined'}}
+        if: ${{ steps.current_deployment.outputs.deploy_version == 'undefined'}}
         run: exit 1
 
-      - name: 'Update gcp Image'
-        uses: ./.github/workflows/actions/update-gcp-image/
-        with:
-          deployment_version: $(${{steps.deployment_version.outputs.deploy_version}} - 1)
+  rollback-image:
+    needs: get-rollback-version
+    uses: ./.github/workflows/actions/update-gcp-image.yaml
+    with:
+      deployment_version: ${{needs.get-rollback-version.outputs.rollback-version}}
           
