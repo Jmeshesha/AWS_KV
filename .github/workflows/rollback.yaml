@@ -46,4 +46,6 @@ jobs:
       deployment_version: ${{needs.get-rollback-version.outputs.rollback-version}}
     secrets: 
       gcp_credentials: ${{ secrets.GCP_SERVICE_ACCOUNT_CREDENTIALS }}
+      db_username: ${{ secrets.DB_USERNAME }}
+      db_password: ${{ secrets.DB_PASSWORD }}
           
