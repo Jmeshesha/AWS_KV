@@ -27,7 +27,7 @@ import socket
 from flask_apscheduler import APScheduler
 
 #keyValueStore = KeyValueStore(1)
-keyValueStore = ThreadSafeDictionary(10)
+keyValueStore = ThreadSafeDictionary()
 
 HOST, PORT = '0.0.0.0', 80
 server_startup_finished = False
