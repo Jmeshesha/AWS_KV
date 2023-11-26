@@ -8,7 +8,7 @@ on:
       - '.github/workflows/**'
       - 'deployment_scripts/**'
       - 'README.md'
-      - 'tests/**'
+      - 'components/tests/**'
 
 jobs:
   get-deploy-version:
