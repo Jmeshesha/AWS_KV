@@ -30,7 +30,7 @@ from flask_apscheduler import APScheduler
 keyValueStore = ThreadSafeDictionary()
 
 HOST, PORT = '0.0.0.0', 80
-server_startup_finished = False
+server_startup_finished = True
 
 app = Flask(__name__)
 scheduler = APScheduler()
