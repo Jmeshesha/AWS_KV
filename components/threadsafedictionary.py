@@ -6,7 +6,7 @@ class ThreadSafeDictionary:
     def __init__(self):
         self.data = {}
         self.mutex = Lock()
-        
+    
     def insertMany(self, kvPairs):
         self.mutex.acquire(blocking=True)
         for key, value in kvPairs:

@@ -1,4 +1,4 @@
 # ignore ALL .log files
 *.log
-__pycache__
+**__pycache__**
 .pytest_cache

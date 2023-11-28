@@ -190,12 +190,7 @@ def data_dump():
         temp[kv[0]] = kv[1]
     return Response(json.dumps(temp), mimetype="application/json")
 
-# Load store with database
-with app.app_context():
-    previousRecords = persistantDb.getPreviousRecords()
-    keyValueStore.insertFromDB(db_query_results=previousRecords)
-    server_startup_finished = True
-    print("Finished loading from db")
+
 
 # Scheduler thread for running persistance storage
 @scheduler.task('interval', id='persistanceJob', seconds=10)
@@ -204,6 +199,12 @@ def persistanceRunner():
 
 
 if __name__== "__main__":
+    # Load store with database
+    with app.app_context():
+        previousRecords = persistantDb.getPreviousRecords()
+        keyValueStore.insertFromDB(db_query_results=previousRecords)
+        server_startup_finished = True
+        print("Finished loading from db")
     scheduler.init_app(app)
     scheduler.start()
     app.run(HOST, PORT, threaded=True, debug=False)

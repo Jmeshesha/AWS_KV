@@ -2,10 +2,6 @@ from persistance import AsyncPersistance
 import os
 from flask import Flask, g
 from unittest import mock
-
-os.environ["DB_USERNAME"] = "test"
-os.environ["DB_PASSWORD"] = "test"
-
 class MockDb:
     def __init__(self):
         self.mockCursor = MockCursor()
@@ -26,6 +22,10 @@ class MockCursor:
         pass
     def fetchall(self):
         return None
+os.environ["DB_USERNAME"] = "test"
+os.environ["DB_PASSWORD"] = "test"
+
+
 
 class TestPersistance:
     def test_saveSingleInsert(self):
