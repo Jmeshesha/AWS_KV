@@ -6,11 +6,15 @@ import multiprocessing
 import requests
 import time
 import random
+import matplotlib.pyplot as plt
+import numpy as np
+
+latencies = []  # To store latencies for each request
 
 # use nginx load balancing
 def kv_store_client(operation, key, value=None):
     # Determine which server to use based on the key
-    server_url = 'http://127.0.0.1:80'
+    server_url = 'http://34.96.69.107'
     start_time = time.time()
     try:
         if operation == 'set':
@@ -74,7 +78,7 @@ def benchmark(num_operations, num_processes):
 
     while not latencies_queue.empty():
         total_latencies.append(latencies_queue.get())
-
+    
     average_latency = (sum(total_latencies) / len(total_latencies)) * 1000
     print(f'Total Latency: {sum(total_latencies):.2f} second')
     print(f'Length of latencies: {len(total_latencies):.0f} latencies')
@@ -84,7 +88,15 @@ def benchmark(num_operations, num_processes):
     print(f'Throughput: {throughput:.2f} operations per second')
     print(f'Total Benchmark Time: {total_time:.2f} seconds')
 
+    x = np.linspace(0, throughput, len(total_latencies))
+    total_latencies.sort()
+    plt.plot(x, total_latencies)
+    plt.title('Latencies Over Throughput With 2 Nodes')
+    plt.xlabel('Throughput (requests per second)')
+    plt.ylabel('Latency (seconds)')
+    plt.show()
+
 if __name__ == '__main__':
-    num_operations_per_process = 100
+    num_operations_per_process = 440
     num_processes = 5
     benchmark(num_operations_per_process, num_processes)
